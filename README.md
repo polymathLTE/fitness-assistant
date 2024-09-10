@@ -17,7 +17,7 @@ a free course about LLMs and RAG.
 ## Project overview
 
 The Fitness Assistant is a RAG application designed to assist
-users with their fitness routines.
+users with their fitness routine.
 
 The main use cases include:
 
@@ -196,12 +196,12 @@ your logs:
 ```
 Database timezone: Etc/UTC
 Database current time (UTC): 2024-08-24 06:43:12.169624+00:00
-Database current time (Europe/Berlin): 2024-08-24 08:43:12.169624+02:00
+Database current time (Africa/Lagos): 2024-08-24 08:43:12.169624+02:00
 Python current time: 2024-08-24 08:43:12.170246+02:00
 Inserted time (UTC): 2024-08-24 06:43:12.170246+00:00
-Inserted time (Europe/Berlin): 2024-08-24 08:43:12.170246+02:00
+Inserted time (Africa/Lagos): 2024-08-24 08:43:12.170246+02:00
 Selected time (UTC): 2024-08-24 06:43:12.170246+00:00
-Selected time (Europe/Berlin): 2024-08-24 08:43:12.170246+02:00
+Selected time (Africa/Lagos): 2024-08-24 08:43:12.170246+02:00
 ```
 
 Make sure the time is correct.
@@ -338,4 +338,4 @@ We use Flask for serving the application as an API.
 Refer to the ["Using the Application" section](#using-the-application)
 for examples on how to interact with the application.
 
-> This demo will run on ```polymathic.tech:5000```
+# This demo will run on ```polymathic.tech:5000```
