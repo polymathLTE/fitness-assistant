@@ -1,8 +1,5 @@
 # Fitness Assistant
 
-<p align="center">
-  <img src="images/banner.jpg">
-</p>
 
 Staying consistent with fitness routines is challenging,
 especially for beginners. Gyms can be intimidating, and personal
@@ -15,20 +12,6 @@ manageable.
 This project was implemented for 
 [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp) -
 a free course about LLMs and RAG.
-
-<p align="center">
-  <img src="images/image.png">
-</p>
-
-To see a demo of the project and instructions on how to run it
-on github codespaces, check this video:
-
-
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=RiQcSHzR8_E">
-    <img src="https://markdown-videos-api.jorgenkh.no/youtube/RiQcSHzR8_E">
-  </a>
-</p>
 
 
 ## Project overview
@@ -68,8 +51,8 @@ You can find the data in [`data/data.csv`](data/data.csv).
 
 ## Technologies
 
-- Python 3.12
-- Docker and Docker Compose for containerization
+- Python 3.12 - [instructions](https://wiki.crowncloud.net/?How_to_Install_Python_3_12_on_Ubuntu_20_04)
+- Docker and Docker Compose for containerization - `sudo apt-get install docker-compose`
 - [Minsearch](https://github.com/alexeygrigorev/minsearch) for full-text search
 - Flask as the API interface (see [Background](#background) for more information on Flask)
 - Grafana for monitoring and PostgreSQL as the backend for it
@@ -80,9 +63,10 @@ You can find the data in [`data/data.csv`](data/data.csv).
 Since we use OpenAI, you need to provide the API key:
 
 1. Install `direnv`. If you use Ubuntu, run `sudo apt install direnv` and then `direnv hook bash >> ~/.bashrc`.
-2. Copy `.envrc_template` into `.envrc` and insert your key there.
-3. For OpenAI, it's recommended to create a new project and use a separate key.
-4. Run `direnv allow` to load the key into your environment.
+2. run `source ~/.bashrc` to setup `.bashrc`
+3. Copy `.envrc_template` into `.envrc` and insert your key there.
+4. For OpenAI, it's recommended to create a new project and use a separate key.
+5. Run `direnv allow` to load the key into your environment.
 
 For dependency management, we use pipenv, so you need to install it:
 
@@ -354,155 +338,4 @@ We use Flask for serving the application as an API.
 Refer to the ["Using the Application" section](#using-the-application)
 for examples on how to interact with the application.
 
-### Ingestion
-
-The ingestion script is in [`ingest.py`](fitness_assistant/ingest.py).
-
-Since we use an in-memory database, `minsearch`, as our
-knowledge base, we run the ingestion script at the startup
-of the application.
-
-It's executed inside [`rag.py`](fitness_assistant/rag.py)
-when we import it.
-
-## Experiments
-
-For experiments, we use Jupyter notebooks.
-They are in the [`notebooks`](notebooks/) folder.
-
-To start Jupyter, run:
-
-```bash
-cd notebooks
-pipenv run jupyter notebook
-```
-
-We have the following notebooks:
-
-- [`rag-test.ipynb`](notebooks/rag-test.ipynb): The RAG flow and evaluating the system.
-- [`evaluation-data-generation.ipynb`](notebooks/evaluation-data-generation.ipynb): Generating the ground truth dataset for retrieval evaluation.
-
-### Retrieval evaluation
-
-The basic approach - using `minsearch` without any boosting - gave the following metrics:
-
-- Hit rate: 94%
-- MRR: 82%
-
-The improved version (with tuned boosting):
-
-- Hit rate: 94%
-- MRR: 90%
-
-The best boosting parameters:
-
-```python
-boost = {
-    'exercise_name': 2.11,
-    'type_of_activity': 1.46,
-    'type_of_equipment': 0.65,
-    'body_part': 2.65,
-    'type': 1.31,
-    'muscle_groups_activated': 2.54,
-    'instructions': 0.74
-}
-```
-
-### RAG flow evaluation
-
-We used the LLM-as-a-Judge metric to evaluate the quality
-of our RAG flow.
-
-For `gpt-4o-mini`, in a sample with 200 records, we had:
-
-- 167 (83%) `RELEVANT`
-- 30 (15%) `PARTLY_RELEVANT`
-- 3 (1.5%) `NON_RELEVANT`
-
-We also tested `gpt-4o`:
-
-- 168 (84%) `RELEVANT`
-- 30 (15%) `PARTLY_RELEVANT`
-- 2 (1%) `NON_RELEVANT`
-
-The difference is minimal, so we opted for `gpt-4o-mini`.
-
-## Monitoring
-
-We use Grafana for monitoring the application. 
-
-It's accessible at [localhost:3000](http://localhost:3000):
-
-- Login: "admin"
-- Password: "admin"
-
-### Dashboards
-
-<p align="center">
-  <img src="images/dash.png">
-</p>
-
-The monitoring dashboard contains several panels:
-
-1. **Last 5 Conversations (Table):** Displays a table showing the five most recent conversations, including details such as the question, answer, relevance, and timestamp. This panel helps monitor recent interactions with users.
-2. **+1/-1 (Pie Chart):** A pie chart that visualizes the feedback from users, showing the count of positive (thumbs up) and negative (thumbs down) feedback received. This panel helps track user satisfaction.
-3. **Relevancy (Gauge):** A gauge chart representing the relevance of the responses provided during conversations. The chart categorizes relevance and indicates thresholds using different colors to highlight varying levels of response quality.
-4. **OpenAI Cost (Time Series):** A time series line chart depicting the cost associated with OpenAI usage over time. This panel helps monitor and analyze the expenditure linked to the AI model's usage.
-5. **Tokens (Time Series):** Another time series chart that tracks the number of tokens used in conversations over time. This helps to understand the usage patterns and the volume of data processed.
-6. **Model Used (Bar Chart):** A bar chart displaying the count of conversations based on the different models used. This panel provides insights into which AI models are most frequently used.
-7. **Response Time (Time Series):** A time series chart showing the response time of conversations over time. This panel is useful for identifying performance issues and ensuring the system's responsiveness.
-
-### Setting up Grafana
-
-All Grafana configurations are in the [`grafana`](grafana/) folder:
-
-- [`init.py`](grafana/init.py) - for initializing the datasource and the dashboard.
-- [`dashboard.json`](grafana/dashboard.json) - the actual dashboard (taken from LLM Zoomcamp without changes).
-
-To initialize the dashboard, first ensure Grafana is
-running (it starts automatically when you do `docker-compose up`).
-
-Then run:
-
-```bash
-pipenv shell
-
-cd grafana
-
-# make sure the POSTGRES_HOST variable is not overwritten 
-env | grep POSTGRES_HOST
-
-python init.py
-```
-
-Then go to [localhost:3000](http://localhost:3000):
-
-- Login: "admin"
-- Password: "admin"
-
-When prompted, keep "admin" as the new password.
-
-## Background
-
-Here we provide background on some tech not used in the
-course and links for further reading.
-
-### Flask
-
-We use Flask for creating the API interface for our application.
-It's a web application framework for Python: we can easily
-create an endpoint for asking questions and use web clients
-(like `curl` or `requests`) for communicating with it.
-
-In our case, we can send questions to `http://localhost:5000/question`.
-
-For more information, visit the [official Flask documentation](https://flask.palletsprojects.com/).
-
-
-## Acknowledgements 
-
-I thank the course participants for all your energy
-and positive feedback as well as the course sponsors for
-making it possible to run this course for free. 
-
-I hope you enjoyed doing the course =)
+> This demo will run on ```polymathic.tech:5000```
